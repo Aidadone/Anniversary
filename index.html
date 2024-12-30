@@ -444,12 +444,12 @@
                 Your browser does not support the audio element.
             </audio>
             <br>
-           <div class="video-container">
-    <video controls loop>
-        <source src="fireworks.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-</div>
+            <div class="video-container">
+                <video controls loop>
+                    <source src="fireworks.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
             <br>
             <p>This little website is something I made to express how much you mean to me. I hope you like it despite how simple it is. What I really want to say is Happy New Year and Happy Anniversary, Sayang. ❤️ I hope this year will be great for you and bring you countless of opportunities to shine. May this year filled with happiness, good health, and everything your heart desires. 
                 Just remember that I'll always be here to cheer you on and celebrate every step of your journey. I'm so proud of you for all things you've accomplished and the person you've become in 2024. From college to university, your outstanding results, your part time work, your involvement in club, you're truly amazing baby. You're the reason I keep striving for more. 
@@ -461,23 +461,36 @@
     
     <script>
 
-        const firstMeetingDate = new Date("2020-01-01").getTime();
-
+        const firstMeetingDate = new Date("2020-01-01T00:00:00");
+        const targetDate = new Date("2025-01-01T00:00:00");
+        
         function updateCountdown() {
-            const now = new Date().getTime();
-            const elapsed = now - firstMeetingDate;
-
-            const years = Math.floor(elapsed / (1000 * 60 * 60 * 24 * 365));
-            const days = Math.floor((elapsed % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+            const now = new Date();
+        
+            // Calculate the difference in years, days, hours, minutes, and seconds
+            const years = now.getFullYear() - firstMeetingDate.getFullYear();
+            const nextAnniversary = new Date(firstMeetingDate);
+            nextAnniversary.setFullYear(now.getFullYear());
+        
+            // Check if the anniversary for this year has passed
+            if (now < nextAnniversary) {
+                nextAnniversary.setFullYear(now.getFullYear() - 1);
+            }
+        
+            const elapsed = now - nextAnniversary;
+        
+            const days = Math.floor(elapsed / (1000 * 60 * 60 * 24));
             const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
-
+        
+            // Display the result
             document.getElementById("countdown").innerHTML =
                 `${years} Years, ${days} Days, ${hours} Hours, ${minutes} Minutes, ${seconds} Seconds`;
         }
+        
         setInterval(updateCountdown, 1000);
-
+        
         // Validate Password
         function validatePassword() {
             const password = document.getElementById("password").value;
@@ -515,7 +528,15 @@
                     audio.pause();
                     audio.currentTime = 0;
                 });
+                const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+                });
             });
+        });
+        document.querySelectorAll('video').forEach(video => {
+            video.pause();
         });
        // Toggle completed state
     function toggleCompleted(checkbox) {
@@ -630,3 +651,4 @@
 </script>
 </body>
 </html>
+
