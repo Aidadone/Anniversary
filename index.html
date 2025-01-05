@@ -325,34 +325,6 @@
                     <input type="checkbox" onclick="toggleCompleted(this)"> Travel to Japan (and many other countries)
                     <button onclick="deleteItem(this)">❌</button>
                 </li>
-                <li>
-                    <input type="checkbox" onclick="toggleCompleted(this)"> Meet you 🖤
-                    <button onclick="deleteItem(this)">❌</button>
-                </li>
-                <li>
-                    <input type="checkbox" onclick="toggleCompleted(this)"> Get an apartment and buy myself a car
-                    <button onclick="deleteItem(this)">❌</button>
-                </li>
-                <li>
-                    <input type="checkbox" onclick="toggleCompleted(this)"> Graduate with the vice dean's award
-                    <button onclick="deleteItem(this)">❌</button>
-                </li>
-                <li>
-                    <input type="checkbox" onclick="toggleCompleted(this)"> Exprerience my first snow
-                    <button onclick="deleteItem(this)">❌</button>
-                </li>
-                <li>
-                    <input type="checkbox" onclick="toggleCompleted(this)"> Learn sign language
-                    <button onclick="deleteItem(this)">❌</button>
-                </li>
-                <li>
-                    <input type="checkbox" onclick="toggleCompleted(this)"> Move out of the country
-                    <button onclick="deleteItem(this)">❌</button>
-                </li>
-                <li>
-                    <input type="checkbox" onclick="toggleCompleted(this)"> Go to CAS concert
-                    <button onclick="deleteItem(this)">❌</button>
-                </li>
             </ul>
             <div>
                 <input type="text" id="my-bucket-item" placeholder="Add to My Bucket List"> 
@@ -538,108 +510,107 @@
         document.querySelectorAll('video').forEach(video => {
             video.pause();
         });
-       // Toggle completed state
-    function toggleCompleted(checkbox) {
-        const listItem = checkbox.parentElement;
-        listItem.style.textDecoration = checkbox.checked ? "line-through" : "none";
-        saveLists();
-    }
+  // Function to load items from localStorage
+  function loadBucketList() {
+    // Load predefined list
+    const predefinedList = JSON.parse(localStorage.getItem('predefinedList')) || [];
+    const predefinedUl = document.getElementById('predefined-list');
+    predefinedUl.innerHTML = '';
+    predefinedList.forEach(item => {
+        addListItem(predefinedUl, item.text, item.completed, false);
+    });
 
-    // Add a new item to "My Bucket List"
-    function addPredefinedItem() {
-        const input = document.getElementById("my-bucket-item");
-        const predefinedList = document.getElementById("predefined-list");
-        const newItemText = input.value.trim();
+    // Load user list
+    const userList = JSON.parse(localStorage.getItem('userList')) || [];
+    const userUl = document.getElementById('user-list');
+    userUl.innerHTML = '';
+    userList.forEach(item => {
+        addListItem(userUl, item.text, item.completed, true);
+    });
+}
 
-        if (newItemText) {
-            const listItem = createListItem(newItemText, false);
-            predefinedList.appendChild(listItem);
-
-            // Clear the input field
-            input.value = "";
-
-            saveLists();
-        }
-    }
-
-    // Add a new item to "Your Bucket List"
-    function addUserItem() {
-        const input = document.getElementById("user-bucket-item");
-        const userList = document.getElementById("user-list");
-        const newItemText = input.value.trim();
-
-        if (newItemText) {
-            const listItem = createListItem(newItemText, false);
-            userList.appendChild(listItem);
-
-            // Clear the input field
-            input.value = "";
-
-            saveLists();
-        }
-    }
-
-    // Create a list item (for either list)
-    function createListItem(text, isCompleted) {
-        const listItem = document.createElement("li");
-        listItem.innerHTML = `
-            <input type="checkbox" ${isCompleted ? "checked" : ""} onclick="toggleCompleted(this)"> ${text}
-            <button onclick="deleteItem(this)">❌</button>
-        `;
-        listItem.style.textDecoration = isCompleted ? "line-through" : "none";
-
-        return listItem;
-    }
-
-    // Delete an item
-    function deleteItem(button) {
-        const listItem = button.parentElement;
-        listItem.parentElement.removeChild(listItem);
-
-        saveLists();
-    }
-
-    // Save both lists to localStorage
-    function saveLists() {
-        const predefinedList = document.querySelectorAll("#predefined-list li");
-        const userList = document.querySelectorAll("#user-list li");
-
-        const predefinedItems = [];
-        predefinedList.forEach((li) => {
-            const text = li.childNodes[1].nodeValue.trim();
-            const isCompleted = li.querySelector("input[type='checkbox']").checked;
-            predefinedItems.push({ text, isCompleted });
+// Function to save items to localStorage
+function saveBucketList() {
+    const predefinedList = [];
+    document.querySelectorAll('#predefined-list li').forEach(li => {
+        predefinedList.push({
+            text: li.innerText.replace('❌', '').trim(),
+            completed: li.querySelector('input').checked
         });
+    });
+    localStorage.setItem('predefinedList', JSON.stringify(predefinedList));
 
-        const userItems = [];
-        userList.forEach((li) => {
-            const text = li.childNodes[1].nodeValue.trim();
-            const isCompleted = li.querySelector("input[type='checkbox']").checked;
-            userItems.push({ text, isCompleted });
+    const userList = [];
+    document.querySelectorAll('#user-list li').forEach(li => {
+        userList.push({
+            text: li.innerText.replace('❌', '').trim(),
+            completed: li.querySelector('input').checked
         });
+    });
+    localStorage.setItem('userList', JSON.stringify(userList));
+}
 
-        localStorage.setItem("predefinedBucketList", JSON.stringify(predefinedItems));
-        localStorage.setItem("userBucketList", JSON.stringify(userItems));
+// Function to add list item
+function addListItem(ul, text, completed, isUserItem) {
+    const li = document.createElement('li');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = completed;
+    checkbox.onclick = function () {
+        toggleCompleted(this);
+        saveBucketList();
+    };
+    li.appendChild(checkbox);
+
+    li.appendChild(document.createTextNode(text));
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = '❌';
+    deleteButton.onclick = function () {
+        deleteItem(this);
+        saveBucketList();
+    };
+    li.appendChild(deleteButton);
+
+    ul.appendChild(li);
+    if (isUserItem) saveBucketList();
+}
+
+// Add predefined item
+function addPredefinedItem() {
+    const input = document.getElementById('my-bucket-item');
+    const text = input.value.trim();
+    if (text) {
+        addListItem(document.getElementById('predefined-list'), text, false, false);
+        saveBucketList();
+        input.value = '';
     }
+}
 
-    // Load both lists from localStorage
-    function loadLists() {
-        const predefinedItems = JSON.parse(localStorage.getItem("predefinedBucketList") || "[]");
-        const userItems = JSON.parse(localStorage.getItem("userBucketList") || "[]");
-
-        const predefinedList = document.getElementById("predefined-list");
-        const userList = document.getElementById("user-list");
-
-        predefinedItems.forEach((item) => {
-            const listItem = createListItem(item.text, item.isCompleted);
-            predefinedList.appendChild(listItem);
-        });
-
-        userItems.forEach((item) => {
-            const listItem = createListItem(item.text, item.isCompleted);
-            userList.appendChild(listItem);
-        });
+// Add user item
+function addUserItem() {
+    const input = document.getElementById('user-bucket-item');
+    const text = input.value.trim();
+    if (text) {
+        addListItem(document.getElementById('user-list'), text, false, true);
+        saveBucketList();
+        input.value = '';
     }
+}
+
+// Toggle completed state
+function toggleCompleted(checkbox) {
+    checkbox.parentElement.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
+}
+
+// Delete item
+function deleteItem(button) {
+    button.parentElement.remove();
+}
+
+// Load items when the page loads
+window.onload = loadBucketList;
+
     document.querySelectorAll('.things-image').forEach(image => {
         image.addEventListener('click', () => {
             const descriptionId = image.getAttribute('data-description');
@@ -651,4 +622,3 @@
 </script>
 </body>
 </html>
-
